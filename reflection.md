@@ -4,8 +4,15 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+My initial UML design used five core classes: Owner, Pet, Task, Scheduler, and DailyPlan. Each owner can own multiple pets, which each can have multiple tasks, which the Scheduler uses to produce a DailyPlan.
+
+I assigned responsibilities as follows:
+
+- Owner: stores owner profile info and preferences (for example available time windows and care priorities).
+- Pet: stores pet details and acts as the container for that pet's care tasks.
+- Task: represents one care action with fields for type (walk, feeding, medication, enrichment, grooming, appointment), duration, priority, and optional preferred/fixed time.
+- Scheduler: applies the planning logic by placing fixed-time tasks first, then ordering the rest by priority and fit within available time.
+- DailyPlan: stores the final scheduled tasks (and any unscheduled tasks) for a specific date so the UI can present a clear daily routine.
 
 **b. Design changes**
 
