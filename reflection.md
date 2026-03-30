@@ -27,8 +27,8 @@ I assigned responsibilities as follows:
 
 My scheduler considers these main constraints:
 
-- Owner time budget (`daily_available_minutes`), so planned tasks do not exceed what the owner can realistically do.
-- Day window preferences (`start_of_day`, `end_of_day`), so tasks are only scheduled in allowed hours.
+- Owner time budget (daily_available_minutes), so planned tasks do not exceed what the owner can realistically do.
+- Day window preferences (start_of_day, end_of_day), so tasks are only scheduled in allowed hours.
 - Fixed-time tasks and preferred times, where fixed tasks must happen at their exact time and preferred times are used when possible.
 - Task urgency signals: due date first, then priority level, then duration as a tie-breaker.
 - Multi-pet coordination, including combining compatible walk tasks so one walk can satisfy multiple pets.
@@ -48,9 +48,9 @@ This is because of several reasons. First, it makes it far easier to explain the
 
 **a. How you used AI**
 
-I used AI throughout the project in three main ways: design brainstorming, targeted debugging, and test expansion. Early on, I used it to pressure-test my class structure and clarify responsibilities between `Owner`, `Pet`, `Task`, and `Scheduler` before writing full logic. During implementation, I used it to reason through scheduling edge cases (fixed-time behavior, overlap detection, and owner time-budget constraints) and to spot places where my assumptions did not match actual code behavior. I also used AI to propose additional tests so my verification covered not only common flows but also boundary conditions.
+I often used the AI to help me quickly brainstorm the how and why the program should work, using it to provide a list of suggestisons as well as asking my own and asking how feasible it was. Then I used it to quickly implement said programs using the designs I cooked up in the brainstroming phase, looking it over and asking about anything I didn't understand or felt needed changes. Then, I used it to quickly create tests that would effectively test the functionality of the program.
 
-The most helpful prompts were specific, behavior-focused questions tied to the current codebase, such as: "What edge cases are missing from these scheduler tests?" and "Given this implementation, what should happen when available minutes are zero or negative?" Prompts that included exact constraints, expected outcomes, and the relevant file context produced much better results than broad prompts like "improve my scheduler." In practice, the best AI collaboration came from short iterative cycles: ask a focused question, apply a small change, run tests, and then refine.
+The most helpful prompts were specific, behavior-focused questions tied to the current codebase, such as: "What edge cases are missing from these scheduler tests?" and "Given this implementation, what should happen when available minutes are zero or negative?" Prompts that included exact constraints, expected outcomes, and the relevant file context produced much better results than broad prompts like "improve my scheduler."
 
 **b. Judgment and verification**
 
@@ -74,18 +74,16 @@ I am fairly confident the scheduler works correctly for the main project scenari
 
 If I had more time, I would test duplicate tasks, more complex multi-pet schedules, and larger stress tests inputs with many tasks in one day.
 
----
-
 ## 5. Reflection
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+I am extremely satisfied with how the scheduler turned out. From my tests, it seems to work very reliably and fits different tasks in well.
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+If I had another iteration, most of my improvements would go to the UI, making it so that more information is availble in the screen at once so that the user doesn't have to keep scrolling down. I would also improve the plan explanation text in the UI so users can more easily understand why tasks were scheduled this way or left unscheduled.
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+My key takeaway is that giving AI clear, specific intrunctions for specific parts of a program allows it to work far better than if a gave a general description of a program I wanted and then asked it to make it for me.

@@ -51,3 +51,5 @@ python -m pytest
 These tests cover core scheduling and planning behavior, including task completion, recurring task creation (daily and weekly), multi-pet daily plan generation, walk merging, conflict detection rules, handling of zero and negative available minutes, fixed-time task boundaries, boundary-touching time slots, and behavior when no tasks exist.
 
 My confidence level is 4.
+
+<a href="Screenshot 2026-03-29 223125.png" target="_blank"><img src='Screenshot 2026-03-29 223125.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>.
