@@ -40,7 +40,7 @@ I prioritized constraints in this order: safety/real-world feasibility first (ti
 
 One tradeoff is that the scheduler favors deterministic, rule-based ordering over a globally optimal schedule. It places fixed-time tasks first, then schedules the remaining tasks by due date, priority, and fit, instead of running a heavier optimization algorithm across all combinations.
 
-This is reasonable for this scenario because pet owners need a plan that is fast, predictable, and easy to understand. A fully optimized search might find slightly better minute-by-minute arrangements, but it would be more complex, harder to explain in the UI, and less maintainable. The current tradeoff gives strong practical behavior (including walk merging and conflict reporting) while keeping the app responsive and the scheduling decisions transparent.
+This is because of several reasons. First, it makes it far easier to explain the reasoning to a concerned pet owner. Seceondly, this ensures consitency with similar tasks and schedules, allowing pet owners to gain a general feel for how the day will plan out. Third, this approach is easier to test and maintain: each rule (fixed-time placement, prioritization, conflict detection, walk merging) can be validated independently, making bugs easier to find and fix. Finally, the app stays responsive in an interactive Streamlit workflow, where users expect near-instant plan updates after each input change. Overall, the design prioritizes consistency, transparency, and maintainability over marginal optimization.
 
 ---
 
@@ -48,13 +48,15 @@ This is reasonable for this scenario because pet owners need a plan that is fast
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+I used AI throughout the project in three main ways: design brainstorming, targeted debugging, and test expansion. Early on, I used it to pressure-test my class structure and clarify responsibilities between `Owner`, `Pet`, `Task`, and `Scheduler` before writing full logic. During implementation, I used it to reason through scheduling edge cases (fixed-time behavior, overlap detection, and owner time-budget constraints) and to spot places where my assumptions did not match actual code behavior. I also used AI to propose additional tests so my verification covered not only common flows but also boundary conditions.
+
+The most helpful prompts were specific, behavior-focused questions tied to the current codebase, such as: "What edge cases are missing from these scheduler tests?" and "Given this implementation, what should happen when available minutes are zero or negative?" Prompts that included exact constraints, expected outcomes, and the relevant file context produced much better results than broad prompts like "improve my scheduler." In practice, the best AI collaboration came from short iterative cycles: ask a focused question, apply a small change, run tests, and then refine.
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+One clear moment was when I explored the edge case where there was a fixed-time task with no preferred time. Initially, the AI wanted to make it so that fixed-time tasks with no preferred time was unscheduled, however, I decided it was better for it to just be treated as a regular task with flexible time.
+
+I verified the suggestions by going over the code and running the test suite after each change. I compared expected behavior against the actual rule path in the code, then updated the test to reflect the current behavior and documented that behavior explicitly.
 
 ---
 
@@ -62,13 +64,15 @@ This is reasonable for this scenario because pet owners need a plan that is fast
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+I tested core scheduling and planning behavior, including task completion, recurring task creation (daily and weekly), multi-pet daily plan generation, walk merging, conflict detection rules, handling of zero and negative available minutes, fixed-time task boundaries, boundary-touching time slots, and behavior when no tasks exist.
+
+These tests were important because they verify both normal workflows and failure paths, which gave me confidence that the planner is reliable in realistic day-to-day use.
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+I am fairly confident the scheduler works correctly for the main project scenarios because the core planning rules and key edge cases are covered by tests and validated through repeated runs.
+
+If I had more time, I would test duplicate tasks, more complex multi-pet schedules, and larger stress tests inputs with many tasks in one day.
 
 ---
 

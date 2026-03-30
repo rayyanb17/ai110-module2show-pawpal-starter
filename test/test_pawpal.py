@@ -194,5 +194,156 @@ def test_detect_time_conflicts_ignores_walk_to_walk_overlap() -> None:
 	assert all("Breakfast" in conflict for conflict in conflicts)
 
 
+@pytest.mark.parametrize("available_minutes", [0, -30])
+def test_generate_owner_daily_plan_with_non_positive_minutes_unschedules_all_tasks(available_minutes: int) -> None:
+	system = PawPalSystem()
+	owner = Owner(owner_id="owner-1", name="Jordan", daily_available_minutes=available_minutes)
+	system.add_owner(owner)
+
+	pet = Pet(pet_id="pet-1", name="Mochi", species="dog", age=4)
+	system.add_pet("owner-1", pet)
+	today = date.today()
+
+	system.add_task(
+		"pet-1",
+		Task(
+			title="Breakfast",
+			task_type=TaskType.FEEDING,
+			duration_minutes=15,
+			priority=5,
+			due_date=today,
+		),
+	)
+	system.add_task(
+		"pet-1",
+		Task(
+			title="Morning Walk",
+			task_type=TaskType.WALK,
+			duration_minutes=30,
+			priority=4,
+			due_date=today,
+		),
+	)
+
+	plan = system.generate_owner_daily_plan("owner-1", today)
+
+	assert len(plan.items) == 0
+	assert len(plan.unscheduled_tasks) == 2
+
+
+def test_fixed_time_task_without_preferred_time_falls_back_to_flexible_scheduling() -> None:
+	system = PawPalSystem()
+	owner = Owner(owner_id="owner-1", name="Jordan", daily_available_minutes=60)
+	system.add_owner(owner)
+
+	pet = Pet(pet_id="pet-1", name="Mochi", species="dog", age=4)
+	system.add_pet("owner-1", pet)
+	today = date.today()
+
+	system.add_task(
+		"pet-1",
+		Task(
+			title="Vet check-in call",
+			task_type=TaskType.APPOINTMENT,
+			duration_minutes=20,
+			priority=5,
+			due_date=today,
+			is_fixed_time=True,
+			preferred_time=None,
+		),
+	)
+
+	plan = system.generate_owner_daily_plan("owner-1", today)
+
+	assert len(plan.items) == 1
+	assert plan.items[0].task.title == "Vet check-in call"
+	assert plan.items[0].start_time.time() == time(6, 0)
+	assert plan.unscheduled_tasks == []
+
+
+def test_fixed_time_tasks_outside_day_bounds_are_unscheduled() -> None:
+	system = PawPalSystem()
+	owner = Owner(owner_id="owner-1", name="Jordan", daily_available_minutes=180)
+	system.add_owner(owner)
+
+	pet = Pet(pet_id="pet-1", name="Mochi", species="dog", age=4)
+	system.add_pet("owner-1", pet)
+	today = date.today()
+
+	system.add_task(
+		"pet-1",
+		Task(
+			title="Too Early Walk",
+			task_type=TaskType.WALK,
+			duration_minutes=20,
+			priority=4,
+			due_date=today,
+			preferred_time=time(5, 30),
+			is_fixed_time=True,
+		),
+	)
+	system.add_task(
+		"pet-1",
+		Task(
+			title="Too Late Medication",
+			task_type=TaskType.MEDICATION,
+			duration_minutes=20,
+			priority=5,
+			due_date=today,
+			preferred_time=time(21, 50),
+			is_fixed_time=True,
+		),
+	)
+
+	plan = system.generate_owner_daily_plan("owner-1", today)
+
+	assert len(plan.items) == 0
+	assert len(plan.unscheduled_tasks) == 2
+	assert {task.title for task in plan.unscheduled_tasks} == {"Too Early Walk", "Too Late Medication"}
+
+
+def test_detect_time_conflicts_when_tasks_touch_boundaries_has_no_conflict() -> None:
+	system = PawPalSystem()
+
+	walk = Task(
+		title="Morning Walk",
+		task_type=TaskType.WALK,
+		duration_minutes=30,
+		priority=5,
+	)
+	feeding = Task(
+		title="Breakfast",
+		task_type=TaskType.FEEDING,
+		duration_minutes=15,
+		priority=4,
+	)
+
+	start = datetime.combine(date.today(), time(8, 0))
+	middle = start + timedelta(minutes=30)
+	end = middle + timedelta(minutes=15)
+
+	conflicts = system.scheduler.detect_time_conflicts(
+		[
+			ScheduledTask(walk, start, middle, pet_names=["Mochi"]),
+			ScheduledTask(feeding, middle, end, pet_names=["Mochi"]),
+		]
+	)
+
+	assert conflicts == []
+
+
+def test_generate_owner_daily_plan_for_pet_with_no_tasks_is_empty() -> None:
+	system = PawPalSystem()
+	owner = Owner(owner_id="owner-1", name="Jordan", daily_available_minutes=90)
+	system.add_owner(owner)
+	system.add_pet("owner-1", Pet(pet_id="pet-1", name="Mochi", species="dog", age=4))
+
+	plan = system.generate_owner_daily_plan("owner-1", date.today())
+
+	assert plan.items == []
+	assert plan.unscheduled_tasks == []
+	assert plan.conflicts == []
+
+
 if __name__ == "__main__":
 	raise SystemExit(pytest.main([__file__, "-v"]))
