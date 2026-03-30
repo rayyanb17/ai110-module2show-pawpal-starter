@@ -25,13 +25,22 @@ I assigned responsibilities as follows:
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+My scheduler considers these main constraints:
+
+- Owner time budget (`daily_available_minutes`), so planned tasks do not exceed what the owner can realistically do.
+- Day window preferences (`start_of_day`, `end_of_day`), so tasks are only scheduled in allowed hours.
+- Fixed-time tasks and preferred times, where fixed tasks must happen at their exact time and preferred times are used when possible.
+- Task urgency signals: due date first, then priority level, then duration as a tie-breaker.
+- Multi-pet coordination, including combining compatible walk tasks so one walk can satisfy multiple pets.
+- Conflict awareness: overlapping tasks are detected and reported (except walk-walk overlap, which is intentionally allowed).
+
+I prioritized constraints in this order: safety/real-world feasibility first (time window and fixed-time rules), then urgency (due date + priority), then optimization (fit and combining walks). I chose this order because in a pet-care scenario, missing medication time or scheduling outside owner availability is more harmful than small efficiency losses. Once those hard constraints are respected, the scheduler can optimize convenience.
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+One tradeoff is that the scheduler favors deterministic, rule-based ordering over a globally optimal schedule. It places fixed-time tasks first, then schedules the remaining tasks by due date, priority, and fit, instead of running a heavier optimization algorithm across all combinations.
+
+This is reasonable for this scenario because pet owners need a plan that is fast, predictable, and easy to understand. A fully optimized search might find slightly better minute-by-minute arrangements, but it would be more complex, harder to explain in the UI, and less maintainable. The current tradeoff gives strong practical behavior (including walk merging and conflict reporting) while keeping the app responsive and the scheduling decisions transparent.
 
 ---
 
